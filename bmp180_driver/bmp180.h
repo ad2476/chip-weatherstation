@@ -20,27 +20,28 @@
 
 #define BMP_INVALRES ((1<<0xF)>>0xF) // i.e. 0b 1111 1111 1111 1111 i.e. -1
 
+typedef enum { OSS_LOW, OSS_STANDARD, OSS_HIGH, OSS_ULTRA } Oversample;
+
 typedef struct bmp180_i2c {
   int fd; // i2c device fd
   /* calibration coef. reg. vals: */
   int16_t AC1, AC2, AC3; uint16_t AC4, AC5, AC6;
   int16_t B1, B2;
   int16_t MB, MC, MD;
+  Oversample oss; // precision val used for measurements/calibration
   /* results of raw temp/pressure reads: */
-  int16_t raw_temp_adc, raw_pressure_adc;
+  int32_t raw_temp_adc, raw_pressure_adc;
+  float calib_temp_c, calib_press_hpa;
 } bmp180_i2c_t;
 
-typedef enum { OSS_LOW, OSS_STANDARD, OSS_HIGH, OSS_ULTRA } Oversample;
-
 // i2c-comms related:
-int bmp180_init(struct bmp180_i2c *bmp, int i2cbus);
+int bmp180_init(struct bmp180_i2c *bmp, int i2cbus, Oversample precision);
 int bmp180_close(struct bmp180_i2c *bmp);
 uint8_t bmp180_checkID(struct bmp180_i2c *bmp);
-int bmp180_pollADCvals(struct bmp180_i2c *bmp, Oversample precision);
+int bmp180_pollADCvals(struct bmp180_i2c *bmp);
 
 // calibration/conversion related:
-double computeTrueTemp(struct bmp180_i2c *bmp, int16_t raw_temp);
-double computeTruePressure(struct bmp180_i2c *bmp, int16_t raw_pressure);
+void bmp180_compute_true_atmo(struct bmp180_i2c *bmp);
 
 // timing-related:
 int wait_us(long delay_ms);

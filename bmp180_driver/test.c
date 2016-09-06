@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
   // initialise the device and populate struct:
   int device = atoi(argv[1]);
   bmp180_i2c_t bmp;
-  int bmpfd = bmp180_init(&bmp, device);
+  int bmpfd = bmp180_init(&bmp, device, OSS_ULTRA);
   if (bmpfd == -1) {
     perror("bmp180_init");
     return 1;
@@ -33,10 +33,13 @@ int main(int argc, char* argv[]) {
     printf("  0x%04x\n", baseptr[i]);
   }
 
-  bmp180_pollADCvals(&bmp, OSS_STANDARD);
-  float temp = computeTrueTemp(&bmp, bmp.raw_temp_adc);
-  printf("Temperature: %.02f deg. C\n", temp);
-  printf("Uncalibrated pressure: 0x%08x\n", bmp.raw_pressure_adc);
+  while(1) {
+    bmp180_pollADCvals(&bmp); // perform measurement reading
+    bmp180_compute_true_atmo(&bmp); // populate temp and pressure fields
+    printf("Temperature: %.02f deg. C\n", bmp.calib_temp_c);
+    printf("Pressure: %.02f hPa\n", bmp.calib_press_hpa);
+    wait_us(1000000);
+  }
 
   bmp180_close(&bmp);
   return 0;

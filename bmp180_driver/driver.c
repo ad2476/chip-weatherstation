@@ -23,7 +23,7 @@ const uint8_t PRESSURE_CTLREG_VALS[] = {0x34, 0x74, 0xB4, 0xF4};
    by the syscall in which the error occurred. The structs fields are not
    then guaranteed to be initialised.
 */
-int bmp180_init(struct bmp180_i2c *bmp, int i2cbus) {
+int bmp180_init(struct bmp180_i2c *bmp, int i2cbus, Oversample precision) {
   char i2c_devfn[DEVFN_SIZE];
   snprintf(i2c_devfn, DEVFN_SIZE, "/dev/i2c-%i", i2cbus);
   int fd;
@@ -65,7 +65,7 @@ uint8_t bmp180_checkID(struct bmp180_i2c *bmp) {
    and store it back in the struct. Specify an oversampling precision level.
    Returns 0 on success, -1 on error.
 */
-int bmp180_pollADCvals(struct bmp180_i2c *bmp, Oversample precision) {
+int bmp180_pollADCvals(struct bmp180_i2c *bmp) {
   // write 0x2e to register 0xf4: do temp measurement
   if (bmp180_write_register_byte(bmp->fd,REG_CTRL_MEAS,TEMP_CTLREG_VAL) == -1) {
     return -1;
@@ -76,19 +76,25 @@ int bmp180_pollADCvals(struct bmp180_i2c *bmp, Oversample precision) {
   if ((raw = bmp180_read_register_word(bmp->fd,REG_OUT_MSB)) == -1) {
     return -1;
   }
-  bmp->raw_temp_adc = (int16_t)raw; // store raw temp value
+  bmp->raw_temp_adc = (int32_t)raw; // store raw temp value
 
   // write pressure-related command:
-  uint8_t pressurectl = (precision<<6) | PRESSURE_CTLREG_VALS[precision];
+  uint8_t pressurectl = (bmp->oss<<6) | PRESSURE_CTLREG_VALS[bmp->oss];
   if (bmp180_write_register_byte(bmp->fd,REG_CTRL_MEAS,pressurectl) == -1) {
     return -1;
   }
-  wait_us(OSS_CONV_TIME[precision]); // wait for us appropriate for precision
+  wait_us(OSS_CONV_TIME[bmp->oss]); // wait for us appropriate for precision
   // read raw pressure value:
   if ((raw = bmp180_read_register_word(bmp->fd,REG_OUT_MSB)) == -1) {
     return -1;
   }
-  bmp->raw_pressure_adc = (int16_t)raw;
+  uint8_t xlsb = 0;
+  if (bmp->oss == OSS_ULTRA) { // optionally read XLSB register
+    if ((xlsb = bmp180_read_register_word(bmp->fd,REG_OUT_XLSB)) == -1) {
+      return -1;
+    }
+  }
+  bmp->raw_pressure_adc = ((int32_t)raw<<8 + xlsb)>>(8-bmp->oss);
 
   return 0;
 }
