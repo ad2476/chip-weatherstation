@@ -31,3 +31,10 @@
 # Debug files
 *.dSYM/
 *.su
+
+# swap files
+*.swp
+
+# build outputs
+bmp180_driver/test
+
