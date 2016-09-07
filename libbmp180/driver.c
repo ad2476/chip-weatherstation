@@ -4,7 +4,7 @@
  *
  */
 
-#include "bmp180.h"
+#include "common.h"
 #include "registers.h"
 
 #define DEVFN_SIZE 16

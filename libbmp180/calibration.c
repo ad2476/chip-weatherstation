@@ -4,7 +4,7 @@
  *  Author: Arun Drelich
  *
  */
-#include "bmp180.h"
+#include "common.h"
 
 /* Once the raw ADC values have been sampled and read from their
    respective registers, pass the bmp struct to this function, which will

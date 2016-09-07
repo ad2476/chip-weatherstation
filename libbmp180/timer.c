@@ -6,7 +6,7 @@
 
 #include <signal.h>
 #include <time.h>
-#include "bmp180.h"
+#include "common.h"
 
 #define MICROS_IN_MILLIS 1000000
 #define NANOS_IN_MICROS 1000

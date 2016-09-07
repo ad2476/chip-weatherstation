@@ -35,15 +35,15 @@ typedef struct bmp180_i2c {
 } bmp180_i2c_t;
 
 // i2c-comms related:
-int bmp180_init(struct bmp180_i2c *bmp, int i2cbus, Oversample precision);
-int bmp180_close(struct bmp180_i2c *bmp);
-uint8_t bmp180_checkID(struct bmp180_i2c *bmp);
-int bmp180_pollADCvals(struct bmp180_i2c *bmp);
+extern int bmp180_init(struct bmp180_i2c *bmp, int i2cbus, Oversample precision);
+extern int bmp180_close(struct bmp180_i2c *bmp);
+extern uint8_t bmp180_checkID(struct bmp180_i2c *bmp);
+extern int bmp180_pollADCvals(struct bmp180_i2c *bmp);
 
 // calibration/conversion related:
-void bmp180_compute_true_atmo(struct bmp180_i2c *bmp);
+extern void bmp180_compute_true_atmo(struct bmp180_i2c *bmp);
 
 // timing-related:
-int wait_us(long delay_ms);
+extern int wait_us(long delay_ms);
 
 #endif

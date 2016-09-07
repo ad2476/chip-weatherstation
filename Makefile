@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -g -std=gnu99 -Llibbmp180 -lbmp180
-HEADERS = -Ilibbmp180/
+HEADERS = -Iinclude/
 LDFLAGS = -Wl,-rpath libbmp180/
 
 .PHONY: all
