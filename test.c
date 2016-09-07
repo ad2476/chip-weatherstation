@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "bmp180.h"
+#include "libbmp180/bmp180.h"
 
 int main(int argc, char* argv[]) {
   if (argc != 2) {
